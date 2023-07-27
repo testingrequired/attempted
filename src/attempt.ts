@@ -209,15 +209,29 @@ export class Attempt<T, E = unknown> {
    * Attempt<number>.ofError("...").orThrow("Something went wrong") // Error("Something went wrong")
    * ```
    *
+   * You can also get the error from a failed attempt
+   *
+   * Attempt<number>.ofError("...").orThrow((e) => "Something went wrong: ${e}") // Error("Something went wrong: ...")
+   *
    * @returns Successful attempt value
    */
-  orThrow<ErrorToThrow extends Error = Error>(error: ErrorToThrow | string): T {
+  orThrow<ErrorToThrow extends Error = Error>(
+    errorToThrow: ErrorToThrow | string | ((error: E) => ErrorToThrow | string)
+  ): T {
     if (typeof this.#value === "undefined") {
-      if (typeof error === "string") {
-        throw new Error(error);
+      if (typeof errorToThrow === "string") {
+        throw new Error(errorToThrow);
+      } else if (typeof errorToThrow === "function") {
+        const e = errorToThrow(this.#error as E);
+
+        if (typeof e === "string") {
+          throw new Error(e);
+        } else {
+          throw e;
+        }
       }
 
-      throw error;
+      throw errorToThrow;
     }
 
     return this.#value;

@@ -143,6 +143,26 @@ describe("orThrow", () => {
     ).toThrow(expectedThrownError);
   });
 
+  test("should throw error from fn on failed attempt", () => {
+    const expectedErrorValue = "expectedErrorValue";
+
+    expect(() =>
+      Attempt.ofError(expectedErrorValue).orThrow(
+        (error) => new Error(`expectedThrownError: ${error}`)
+      )
+    ).toThrow(`expectedThrownError: ${expectedErrorValue}`);
+  });
+
+  test("should throw error with string from fn on failed attempt", () => {
+    const expectedErrorValue = "expectedErrorValue";
+
+    expect(() =>
+      Attempt.ofError(expectedErrorValue).orThrow(
+        (error) => `expectedThrownError: ${error}`
+      )
+    ).toThrow(`expectedThrownError: ${expectedErrorValue}`);
+  });
+
   test("should throw error using string message on failed attempt", () => {
     const expectedErrorValue = "expectedErrorValue";
     const expectedThrownError = "expectedThrownError";
