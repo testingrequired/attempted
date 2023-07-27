@@ -211,7 +211,9 @@ export class Attempt<T, E = unknown> {
    *
    * You can also get the error from a failed attempt
    *
+   * ```typescript
    * Attempt<number>.ofError("...").orThrow((e) => "Something went wrong: ${e}") // Error("Something went wrong: ...")
+   * ```
    *
    * @returns Successful attempt value
    */
