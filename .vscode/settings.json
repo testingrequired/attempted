@@ -1,0 +1,6 @@
+{
+    "editor.formatOnSave": true,
+    "typescript.preferGoToSourceDefinition": false,
+    "javascript.inlayHints.variableTypes.enabled": false,
+    "typescript.inlayHints.variableTypes.enabled": true
+}
