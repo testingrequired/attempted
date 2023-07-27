@@ -1,5 +1,5 @@
 {
-  "name": "attempted",
+  "name": "@testingrequired/attempted",
   "version": "0.0.1",
   "description": "Typed error handling for functions",
   "main": "dist/index.umd.js",

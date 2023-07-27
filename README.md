@@ -1,4 +1,4 @@
-# attempted
+# @testingrequired/attempted
 
 [![ci](https://github.com/testingrequired/attempted/actions/workflows/ci.yml/badge.svg)](https://github.com/testingrequired/attempted/actions/workflows/ci.yml)
 
@@ -34,7 +34,7 @@ try {
 ### Using Attempt
 
 ```typescript
-import { Attempt } from "attempted";
+import { Attempt } from "@testingrequired/attempted";
 import { fnThatCouldThrow, ReturnFromFn } from "./fns";
 
 const defaultData: ReturnFromFn = { id: "example-id" };
