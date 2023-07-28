@@ -277,6 +277,34 @@ describe("ifFailure", () => {
   });
 });
 
+describe("ifElse", () => {
+  test("should only call success fn on successful attempt", () => {
+    const successFn = vi.fn();
+    const failureFn = vi.fn();
+
+    Attempt.ofValue(123).ifElse(successFn, failureFn);
+
+    expect(successFn).toHaveBeenCalledOnce();
+    expect(successFn).toHaveBeenCalledWith(123);
+
+    expect(failureFn).not.toBeCalled();
+  });
+
+  test("should only call failure fn on failed attempt", () => {
+    const successFn = vi.fn();
+    const failureFn = vi.fn();
+
+    const expectedError = new Error("expectedError");
+
+    Attempt.ofError(expectedError).ifElse(successFn, failureFn);
+
+    expect(failureFn).toHaveBeenCalledOnce();
+    expect(failureFn).toHaveBeenCalledWith(expectedError);
+
+    expect(successFn).not.toBeCalled();
+  });
+});
+
 describe("assert", () => {
   test("should return failed attempt if assertion failed on successful attempt", () => {
     expect(

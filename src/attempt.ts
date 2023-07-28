@@ -332,6 +332,25 @@ export class Attempt<T, E = unknown> {
   }
 
   /**
+   * Run success or failure function based on attempt
+   *
+   * ```typescript
+   * Attempt.ofValue(123)
+   *   .ifElse(
+   *     value => console.log(`It worked! ${value})
+   *     error => console.log(`It failed! ${error})
+   *   )
+   * ```
+   *
+   * @param successFn Function to run on successful attempt
+   * @param failureFn Function to run on failed attempt
+   */
+  ifElse(successFn: (value: T) => any, failureFn: (error: E) => any): void {
+    this.ifSuccess(successFn);
+    this.ifFailure(failureFn);
+  }
+
+  /**
    * Run function is attempt failed
    *
    * ```typescript
