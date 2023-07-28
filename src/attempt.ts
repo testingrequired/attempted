@@ -72,13 +72,7 @@ export class Attempt<T, E = unknown> {
   static of<F extends (...args: any[]) => any, E = unknown>(
     fn: F,
     ...fnArgs: Parameters<F>
-  ): ReturnType<F> extends Promise<any>
-    ? Awaited<ReturnType<F>> extends Attempt<any>
-      ? Awaited<ReturnType<F>>
-      : Promise<Attempt<Awaited<ReturnType<F>>, E>>
-    : ReturnType<F> extends Attempt<any>
-    ? ReturnType<F>
-    : Attempt<ReturnType<F>, E> {
+  ): AttemptFromFn<F, E> {
     try {
       const value = fn(...fnArgs);
 
@@ -258,13 +252,7 @@ export class Attempt<T, E = unknown> {
    * @param fn Function to map over attempt
    * @returns Either mapped success attempt or the current failed attempt
    */
-  map<F extends (value: T) => any>(
-    fn: F
-  ): ReturnType<F> extends Promise<any>
-    ? Promise<Attempt<Awaited<ReturnType<F>>, E>>
-    : ReturnType<F> extends Attempt<any>
-    ? ReturnType<F>
-    : Attempt<ReturnType<F>, E> {
+  map<F extends (value: T) => any>(fn: F): AttemptFromFn<F, E> {
     if (typeof this.#error !== "undefined") {
       // @ts-ignore
       return Attempt.ofError<N, E>(this.#error) as Attempt<N, E>;
@@ -408,6 +396,51 @@ export class Attempt<T, E = unknown> {
     }
   }
 }
+
+/**
+ * Utility type for conditional types
+ *
+ * @template T Target type
+ * @template E Predicate type
+ * @template A Conditional type if T extends E
+ * @template A Conditional type if T does not extend E
+ */
+type IfExtends<T, E, A, B> = T extends E ? A : B;
+
+/**
+ * Utility conditional type for promises
+ *
+ * @template T Target type
+ * @template A Conditional type if T extends Promise
+ * @template A Conditional type if T does not extend Promise
+ */
+type IfExtendsPromise<T, A, B> = IfExtends<T, Promise<any>, A, B>;
+
+/**
+ * Utility conditional type for attempts
+ *
+ * @template T Target type and conditional type if T extends Attempt
+ * @template A Conditional type if T does not extends Attempt
+ */
+type IfExtendsAttempt<T, A> = IfExtends<T, Attempt<any>, T, A>;
+
+/**
+ * Utility type to map function calls to Attempt results
+ *
+ * @template F Function to be called
+ * @template E Expected error type function throws
+ */
+export type AttemptFromFn<
+  F extends (...args: any[]) => any,
+  E = unknown
+> = IfExtendsPromise<
+  ReturnType<F>,
+  IfExtendsAttempt<
+    Awaited<ReturnType<F>>,
+    Promise<Attempt<Awaited<ReturnType<F>>, E>>
+  >,
+  IfExtendsAttempt<ReturnType<F>, Attempt<ReturnType<F>, E>>
+>;
 
 function isPromise<T>(value: unknown): value is Promise<T> {
   if (value instanceof Promise) {
