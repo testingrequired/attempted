@@ -1,4 +1,4 @@
-# @testingrequired/attempted
+# attempted
 
 [![ci](https://github.com/testingrequired/attempted/actions/workflows/ci.yml/badge.svg)](https://github.com/testingrequired/attempted/actions/workflows/ci.yml)
 
