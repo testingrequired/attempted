@@ -40,11 +40,13 @@ import { fnThatCouldThrow, ReturnFromFn } from "./fns";
 const defaultData: ReturnFromFn = { id: "example-id" };
 const input = 123;
 
-const data: ReturnFromFn = Attempt.of(fnThatCouldThrow, input)
-  .ifError((e) => {
-    console.log(
-      `Calling 'fnThatCouldThrow' with input ${input} threw ${e} getting default value ${defaultData}`
-    );
-  })
-  .orElse(defaultData);
+const attemptedData = Attempt.of(fnThatCouldThrow, input);
+
+attemptedData.ifError((e) =>
+  console.log(
+    `Calling 'fnThatCouldThrow' with input ${input} threw ${e} getting default value ${defaultData}`
+  )
+);
+
+const data = attemptedData.orElse(defaultData);
 ```
