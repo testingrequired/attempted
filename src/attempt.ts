@@ -337,8 +337,8 @@ export class Attempt<T, E = unknown> {
    * ```typescript
    * Attempt.ofValue(123)
    *   .ifElse(
-   *     value => console.log(`It worked! ${value})
-   *     error => console.log(`It failed! ${error})
+   *     value => console.log(`It worked! ${value}`),
+   *     error => console.log(`It failed! ${error}`)
    *   )
    * ```
    *
