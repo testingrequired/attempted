@@ -121,10 +121,10 @@ export class Attempt<T> {
    * Create a failed attempt result from an error
    *
    * ```typescript
-   * // Attempt<unknown, Error>
+   * // Attempt<unknown>
    * const failedAttemptWithError = Attempt.ofError(new Error("Something went wrong"));
    *
-   * // Attempt<unknown, string>
+   * // Attempt<unknown>
    * const failedAttemptWithString = Attempt.ofError("Something went wrong");
    * ```
    *
@@ -374,7 +374,7 @@ export class Attempt<T> {
    * ```
    *
    * @param assertionFn Assertion function to run
-   * @param errorFn Error provider function
+   * @param errorFn Function that returns an error if the assertion fails
    * @returns Either success/failed attempt from the assertion or the failed attempt it was called on
    */
   assert(
