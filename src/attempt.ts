@@ -10,7 +10,7 @@
  *   return 123;
  * }
  *
- * // <Attempt<number>>
+ * // Attempt<number>
  * const successfulAttempt = Attempt
  *   .of(willThrow, false)
  *   .map(value => value * 2);
@@ -18,7 +18,7 @@
  * successfulAttempt.get(); // 246
  * successfulAttempt.getError(); // Throws since a successful attempt has no error
  *
- * // <Attempt<number>>
+ * // Attempt<number>
  * const failedAttempt = Attempt
  *   .of(willThrow, true)
  *   .map(value => value * 2);
@@ -28,9 +28,8 @@
  * ```
  *
  * @template T The successful value type
- * @template E The failure error type
  */
-export class Attempt<T, E = unknown> {
+export class Attempt<T> {
   /**
    * Value when the attempt was successful
    */
@@ -38,9 +37,9 @@ export class Attempt<T, E = unknown> {
   /**
    * Error when the attempt failed
    */
-  #error: E | undefined;
+  #error: unknown | undefined;
 
-  private constructor(value: T | undefined, error: E | undefined) {
+  private constructor(value: T | undefined, error: unknown | undefined) {
     this.#value = value;
     this.#error = error;
   }
@@ -62,21 +61,20 @@ export class Attempt<T, E = unknown> {
    * const attempt = await attemptPromise;
    * ```
    *
-   * @template F Function to be called
-   * @template E Expected error type function throws
+   * @template Fn Function to be called
    *
    * @param fn Function to run
    * @param fnArgs Arguments to pass to function when called
    * @returns Result of the attempted function call
    */
-  static of<F extends (...args: any[]) => any, E = unknown>(
-    fn: F,
-    ...fnArgs: Parameters<F>
-  ): AttemptFromFn<F, E> {
+  static of<Fn extends (...args: any[]) => any>(
+    fn: Fn,
+    ...fnArgs: Parameters<Fn>
+  ): AttemptFromFn<Fn> {
     try {
       const value = fn(...fnArgs);
 
-      if (isPromise<Awaited<ReturnType<F>>>(value)) {
+      if (isPromise<Awaited<ReturnType<Fn>>>(value)) {
         // @ts-ignore
         return value
           .then((v) => {
@@ -84,21 +82,21 @@ export class Attempt<T, E = unknown> {
               return v;
             }
 
-            return Attempt.ofValue<ReturnType<F>, E>(v);
+            return Attempt.ofValue<ReturnType<Fn>>(v);
           })
-          .catch((e) => Attempt.ofError<ReturnType<F>, E>(e));
+          .catch((e) => Attempt.ofError<ReturnType<Fn>>(e));
       }
 
       if (value instanceof Attempt) {
         // @ts-ignore
-        return value as ReturnType<F>;
+        return value as ReturnType<Fn>;
       }
 
       // @ts-ignore
-      return Attempt.ofValue<ReturnType<F>, E>(value);
+      return Attempt.ofValue<ReturnType<Fn>>(value);
     } catch (e) {
       // @ts-ignore
-      return Attempt.ofError<ReturnType<F>, E>(e);
+      return Attempt.ofError<ReturnType<Fn>>(e);
     }
   }
 
@@ -111,13 +109,12 @@ export class Attempt<T, E = unknown> {
    * ```
    *
    * @template T Value for the successful attempt
-   * @template E Optional error type if attempt had failed
    *
    * @param value Value of successful attempt
    * @returns Attempt with a success value
    */
-  static ofValue<T, E = unknown>(value: T): Attempt<T, E> {
-    return new Attempt<T, E>(value, undefined);
+  static ofValue<T>(value: T): Attempt<T> {
+    return new Attempt<T>(value, undefined);
   }
 
   /**
@@ -132,13 +129,12 @@ export class Attempt<T, E = unknown> {
    * ```
    *
    * @template T Value type if attempt had succeeded
-   * @template E Error type for the failed attempt
    *
    * @param error Error for the failed attempt
    * @returns Attempt with failure error
    */
-  static ofError<T = unknown, E = unknown>(error: E): Attempt<T, E> {
-    return new Attempt<T, E>(undefined, error);
+  static ofError<T = unknown>(error: unknown): Attempt<T> {
+    return new Attempt<T>(undefined, error);
   }
 
   /**
@@ -169,7 +165,7 @@ export class Attempt<T, E = unknown> {
    *
    * @returns Error from a failed attempt
    */
-  getError(): E {
+  getError(): unknown {
     if (typeof this.#error === "undefined") {
       throw new Error(`Getting error on success attempt: ${this.#value}`);
     }
@@ -212,13 +208,16 @@ export class Attempt<T, E = unknown> {
    * @returns Successful attempt value
    */
   orThrow<ErrorToThrow extends Error = Error>(
-    errorToThrow: ErrorToThrow | string | ((error: E) => ErrorToThrow | string)
+    errorToThrow:
+      | ErrorToThrow
+      | string
+      | ((error: unknown) => ErrorToThrow | string)
   ): T {
     if (typeof this.#value === "undefined") {
       if (typeof errorToThrow === "string") {
         throw new Error(errorToThrow);
       } else if (typeof errorToThrow === "function") {
-        const e = errorToThrow(this.#error as E);
+        const e = errorToThrow(this.#error);
 
         if (typeof e === "string") {
           throw new Error(e);
@@ -248,14 +247,14 @@ export class Attempt<T, E = unknown> {
    *   .getError() // Error("Something went wrong")
    * ```
    *
-   * @template F Mapping function
+   * @template Fn Mapping function
    * @param fn Function to map over attempt
    * @returns Either mapped success attempt or the current failed attempt
    */
-  map<F extends (value: T) => any>(fn: F): AttemptFromFn<F, E> {
+  map<Fn extends (value: T) => any>(fn: Fn): AttemptFromFn<Fn> {
     if (typeof this.#error !== "undefined") {
       // @ts-ignore
-      return Attempt.ofError<N, E>(this.#error) as Attempt<N, E>;
+      return Attempt.ofError<N>(this.#error) as Attempt<N>;
     }
 
     const newLocal = Attempt.of(() => {
@@ -333,7 +332,10 @@ export class Attempt<T, E = unknown> {
    * @param successFn Function to run on successful attempt
    * @param failureFn Function to run on failed attempt
    */
-  ifElse(successFn: (value: T) => any, failureFn: (error: E) => any): void {
+  ifElse(
+    successFn: (value: T) => any,
+    failureFn: (error: unknown) => any
+  ): void {
     this.ifSuccess(successFn);
     this.ifFailure(failureFn);
   }
@@ -348,9 +350,9 @@ export class Attempt<T, E = unknown> {
    *
    * @param fn Fucntion to run
    */
-  ifFailure(fn: (error: E) => any): void {
+  ifFailure(fn: (error: unknown) => any): void {
     if (this.isFailure()) {
-      fn(this.#error as E);
+      fn(this.#error);
     }
   }
 
@@ -377,10 +379,10 @@ export class Attempt<T, E = unknown> {
    */
   assert(
     assertionFn: (value: T) => boolean,
-    errorFn: (value: T) => E | string
-  ): Attempt<T, E> {
+    errorFn: (value: T) => unknown
+  ): Attempt<T> {
     if (this.isFailure()) {
-      return Attempt.ofError<T, E>(this.#error as E);
+      return Attempt.ofError<T>(this.#error);
     }
 
     if (assertionFn(this.#value as T)) {
@@ -389,10 +391,10 @@ export class Attempt<T, E = unknown> {
       const error = errorFn(this.#value as T);
 
       if (typeof error === "string") {
-        return Attempt.ofError<T, E>(new Error(error) as E);
+        return Attempt.ofError<T>(new Error(error));
       }
 
-      return Attempt.ofError<T, E>(error);
+      return Attempt.ofError<T>(error);
     }
   }
 }
@@ -427,20 +429,17 @@ type IfExtendsAttempt<T, A> = IfExtends<T, Attempt<any>, T, A>;
 /**
  * Utility type to map function calls to Attempt results
  *
- * @template F Function to be called
- * @template E Expected error type function throws
+ * @template Fn Function to be called
  */
-export type AttemptFromFn<
-  F extends (...args: any[]) => any,
-  E = unknown
-> = IfExtendsPromise<
-  ReturnType<F>,
-  IfExtendsAttempt<
-    Awaited<ReturnType<F>>,
-    Promise<Attempt<Awaited<ReturnType<F>>, E>>
-  >,
-  IfExtendsAttempt<ReturnType<F>, Attempt<ReturnType<F>, E>>
->;
+export type AttemptFromFn<Fn extends (...args: any[]) => any> =
+  IfExtendsPromise<
+    ReturnType<Fn>,
+    IfExtendsAttempt<
+      Awaited<ReturnType<Fn>>,
+      Promise<Attempt<Awaited<ReturnType<Fn>>>>
+    >,
+    IfExtendsAttempt<ReturnType<Fn>, Attempt<ReturnType<Fn>>>
+  >;
 
 function isPromise<T>(value: unknown): value is Promise<T> {
   if (value instanceof Promise) {
