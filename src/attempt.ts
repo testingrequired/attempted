@@ -65,7 +65,7 @@ export class Attempt<T> {
    *
    * ```typescript
    * const value = 123;
-   * const attemptA = Attempt.of(value);
+   * const attemptA = Attempt.ofValue(value);
    * const attemptB = Attempt.of(() => attemptA); // Attempt<number>
    *
    * attemptB.get(); // 123
