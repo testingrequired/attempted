@@ -59,9 +59,11 @@ export class Attempt<T> {
    * const attemptPromise = Attempt.of(asyncFnThatMightThrow, fnArg1, fnArg2, ...);
    * // Attempt<ReturnType<typeof fnThatMightThrow>>
    * const attempt = await attemptPromise;
+   * ```
    *
-   * Yopu can even return an attempt from the function
+   * This also works with functions that return an `Attempt`
    *
+   * ```typescript
    * const value = 123;
    * const attemptA = Attempt.of(value);
    * const attemptB = Attempt.of(() => attemptA); // Attempt<number>
