@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 // vite.config.ts
 import { resolve } from "path";
 import { defineConfig } from "vite";
@@ -15,4 +16,9 @@ export default defineConfig({
     },
   },
   plugins: [dts()],
+  test: {
+    typecheck: {
+      include: ["src/attempt.spec.ts"],
+    },
+  },
 });

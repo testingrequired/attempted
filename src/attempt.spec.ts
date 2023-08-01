@@ -1,4 +1,4 @@
-import { describe, expect, test, vi } from "vitest";
+import { assertType, describe, expect, test, vi } from "vitest";
 import { Attempt } from "./attempt";
 
 describe("of", () => {
@@ -81,6 +81,51 @@ describe("of", () => {
     const attempt = await Attempt.of(testFn, 123);
 
     expect(attempt.getError()).toBe(123);
+  });
+});
+
+describe("ofValue", () => {
+  test("should have correct types if input is successful attempt", () => {
+    const attempt = Attempt.ofValue(Attempt.ofValue(123));
+
+    assertType<Attempt<number>>(attempt);
+  });
+
+  test("should return input value if value is successful attempt", () => {
+    const attempt = Attempt.ofValue(Attempt.ofValue(123));
+
+    expect(attempt.get()).toBe(123);
+  });
+
+  test("should throw if input value is failed attempt", () => {
+    const expectedError = new Error("expectedError");
+
+    expect(() => {
+      Attempt.ofValue(Attempt.ofError(expectedError));
+    }).toThrow(`Can not pass a failed attempt as the value: ${expectedError}`);
+  });
+});
+
+describe("ofError", () => {
+  test("should have correct types if input is failed attempt", () => {
+    const expectedError = new Error("expectedError");
+
+    const attempt = Attempt.ofError(Attempt.ofError<number>(expectedError));
+
+    assertType<Attempt<number>>(attempt);
+  });
+
+  test("should return input value if value is failed attempt", () => {
+    const expectedError = new Error("expectedError");
+    const attempt = Attempt.ofError(Attempt.ofError(expectedError));
+
+    expect(attempt.getError()).toBe(expectedError);
+  });
+
+  test("should throw if input value is successful attempt", () => {
+    expect(() => {
+      Attempt.ofError(Attempt.ofValue(123));
+    }).toThrow(`Can not pass a successful attempt as the error: ${123}`);
   });
 });
 

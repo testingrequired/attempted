@@ -33,11 +33,11 @@ export class Attempt<T> {
   /**
    * Value when the attempt was successful
    */
-  #value: T | undefined;
+  readonly #value: T | undefined;
   /**
    * Error when the attempt failed
    */
-  #error: unknown | undefined;
+  readonly #error: unknown | undefined;
 
   private constructor(value: T | undefined, error: unknown | undefined) {
     this.#value = value;
@@ -45,7 +45,7 @@ export class Attempt<T> {
   }
 
   /**
-   * Create an attempt from a function
+   * Create an attempt from a function.
    *
    * ```typescript
    * // Attempt<ReturnType<typeof fnThatMightThrow>>
@@ -59,13 +59,21 @@ export class Attempt<T> {
    * const attemptPromise = Attempt.of(asyncFnThatMightThrow, fnArg1, fnArg2, ...);
    * // Attempt<ReturnType<typeof fnThatMightThrow>>
    * const attempt = await attemptPromise;
+   *
+   * Yopu can even return an attempt from the function
+   *
+   * const value = 123;
+   * const attemptA = Attempt.of(value);
+   * const attemptB = Attempt.of(() => attemptA); // Attempt<number>
+   *
+   * attemptB.get(); // 123
    * ```
    *
    * @template Fn Function to be called
    *
    * @param fn Function to run
-   * @param fnArgs Arguments to pass to function when called
-   * @returns Result of the attempted function call
+   * @param fnArgs Arguments to pass when calling function
+   * @returns Either a successful or failing attempt
    */
   static of<Fn extends (...args: any[]) => any>(
     fn: Fn,
@@ -113,7 +121,19 @@ export class Attempt<T> {
    * @param value Value of successful attempt
    * @returns Attempt with a success value
    */
-  static ofValue<T>(value: T): Attempt<T> {
+  static ofValue<T>(value: T): T extends Attempt<any> ? T : Attempt<T> {
+    if (value instanceof Attempt) {
+      if (value.isFailure()) {
+        throw new Error(
+          `Can not pass a failed attempt as the value: ${value.getError()}`
+        );
+      }
+
+      // @ts-ignore
+      return value;
+    }
+
+    // @ts-ignore
     return new Attempt<T>(value, undefined);
   }
 
@@ -133,7 +153,21 @@ export class Attempt<T> {
    * @param error Error for the failed attempt
    * @returns Attempt with failure error
    */
-  static ofError<T = unknown>(error: unknown): Attempt<T> {
+  static ofError<T = unknown, E = unknown>(
+    error: E
+  ): E extends Attempt<infer U> ? Attempt<U> : Attempt<T> {
+    if (error instanceof Attempt) {
+      if (error.isSuccess()) {
+        throw new Error(
+          `Can not pass a successful attempt as the error: ${error.get()}`
+        );
+      }
+
+      // @ts-ignore
+      return error;
+    }
+
+    // @ts-ignore
     return new Attempt<T>(undefined, error);
   }
 
