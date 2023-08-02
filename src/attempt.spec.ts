@@ -1,4 +1,4 @@
-import { assertType, describe, expect, test, vi } from "vitest";
+import { assertType, describe, expect, expectTypeOf, test, vi } from "vitest";
 import { Attempt } from "./attempt";
 
 describe("of", () => {
@@ -81,6 +81,52 @@ describe("of", () => {
     const attempt = await Attempt.of(testFn, 123);
 
     expect(attempt.getError()).toBe(123);
+  });
+});
+
+describe("wrap", () => {
+  test("should return a wrapped function but not call it", () => {
+    const fn = vi.fn<number[], number>();
+
+    Attempt.wrap(fn);
+
+    expect(fn).not.toBeCalled();
+  });
+
+  test("should return a function that calls the wrapped function", () => {
+    const expectedReturn = 123456;
+
+    const fn = vi.fn<number[], number>().mockReturnValueOnce(expectedReturn);
+
+    const wrappedFn = Attempt.wrap(fn);
+
+    const result = wrappedFn(1, 2, 3);
+
+    expect(fn).toHaveBeenCalledOnce();
+    expect(fn).toHaveBeenCalledWith(1, 2, 3);
+
+    expectTypeOf<Attempt<number>>(result);
+
+    expect(result.get()).toBe(expectedReturn);
+  });
+
+  test("should return a function that calls the wrapped async function", async () => {
+    const expectedReturn = 123456;
+
+    const fn = vi
+      .fn<number[], Promise<number>>()
+      .mockResolvedValue(expectedReturn);
+
+    const wrappedFn = Attempt.wrap(fn);
+
+    const result = await wrappedFn(1, 2, 3);
+
+    expect(fn).toHaveBeenCalledOnce();
+    expect(fn).toHaveBeenCalledWith(1, 2, 3);
+
+    expectTypeOf<Attempt<number>>(result);
+
+    expect(result.get()).toBe(expectedReturn);
   });
 });
 

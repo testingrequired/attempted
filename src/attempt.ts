@@ -111,6 +111,30 @@ export class Attempt<T> {
   }
 
   /**
+   * Wrap the underlying function to be called as an attempt
+   *
+   * ```typescript
+   * function sum(...args: number[]): number {
+   *   return args.reduce((acc, curr) => acc + curr, 0);
+   * }
+   *
+   * const attemptToSum = Attempt.wrap(sum);
+   *
+   * const sumValue = attemptToSum(1, 2, 3)
+   *   .orThrow(e => `Unable to sum: {e}`); // 6
+   * ```
+   *
+   * @param fn Function to wrap
+   * @returns A function that calls the underlying function
+   */
+  static wrap<Fn extends (...args: any[]) => any>(
+    fn: Fn
+  ): (...args: Parameters<Fn>) => AttemptFromFn<Fn> {
+    return (...fnArgs: Parameters<Fn>): AttemptFromFn<Fn> =>
+      Attempt.of(fn, ...fnArgs);
+  }
+
+  /**
    * Create a successful attempt from a value
    *
    * ```typescript
