@@ -1,6 +1,6 @@
 {
   "name": "@testingrequired/attempted",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Typed error handling for functions",
   "main": "dist/index.umd.js",
   "module": "dist/index.mjs",
