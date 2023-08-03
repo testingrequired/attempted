@@ -8,6 +8,12 @@ Typed error handling for calling functions
 
 https://testingrequired.github.io/attempted
 
+## Install
+
+> $ npm install @testingrequired/attempted
+
+https://www.npmjs.com/package/@testingrequired/attempted
+
 ## Example
 
 ```typescript
