@@ -2,7 +2,7 @@
 
 [![ci](https://github.com/testingrequired/attempted/actions/workflows/ci.yml/badge.svg)](https://github.com/testingrequired/attempted/actions/workflows/ci.yml)
 
-Error handling with types!
+Typed error handling for calling functions
 
 ## Docs
 
