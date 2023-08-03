@@ -1,30 +1,77 @@
 /**
- * The result of an attempt to run a function
+ * Typed error handling for calling functions
  *
  * ```typescript
- * function willThrow(shouldThrow: boolean) {
- *   if (shouldThrow) {
- *     throw new Error("Whoops");
- *   }
+ * import { Attempt } from "@testingrequired/attempted";
  *
- *   return 123;
- * }
+ * let attempt: Attempt<number> = Attempt.of(fnMightThrow, ...fnArgs);
  *
- * // Attempt<number>
- * const successfulAttempt = Attempt
- *   .of(willThrow, false)
- *   .map(value => value * 2);
+ * // Returns true if function didn't throw or returned a failed attempt
+ * attempt.isSuccessful();
  *
- * successfulAttempt.get(); // 246
- * successfulAttempt.getError(); // Throws since a successful attempt has no error
+ * // Returns true if function throws or returned a failed attempt
+ * attempt.isFailure();
  *
- * // Attempt<number>
- * const failedAttempt = Attempt
- *   .of(willThrow, true)
- *   .map(value => value * 2);
+ * // You can conditionally run functions on successful or failed attempts
+ * attempt.ifSuccessful((value) => {});
+ * attempt.ifFailure((error) => {});
+ * attempt.ifElse(
+ *   (value) => {},
+ *   (error) => {}
+ * );
  *
- * failedAttempt.getError(); // Error("Whoops")
- * failedAttempt.get(); // Throws since a failed attempt has no value
+ * // Map over successful attempts
+ * // This will not run on a failed attempt
+ * attempt = attempt.map((n) => n * 2);
+ *
+ * // Assert over successful attempts
+ * // Failed assertions will return a failed attempt
+ * // This will not run on a failed attempt
+ * attempt = attempt.assert(
+ *   (value) => value > 100,
+ *   (value) => `Value ${value} was less than 100`
+ * );
+ *
+ * // Returns value on successful attempts
+ * // Throws on failed attempts
+ * attempt.get();
+ *
+ * // Returns error on failed attempts
+ * // Throws on successful attempts
+ * attempt.getError();
+ *
+ * // Get value on successful attempts or a default value.
+ * attempt.orElse(defaultValue);
+ *
+ * // Get value or throw provided error
+ * attempt.orThrow(new Error("Something went wrong"));
+ * attempt.orThrow("Something went wrong");
+ *
+ * // You can pass function to access a failed attempt's error
+ * attempt.orThrow((error) => new Error(`Something went wrong: ${e}`));
+ * attempt.orThrow((error) => `Something went wrong`);
+ * ```
+ *
+ * It also works with async functions!
+ *
+ * ```typescript
+ * import { Attempt } from "@testingrequired/attempted";
+ *
+ * // Await the attempt the same as you would await the function call
+ * let attempt: Attempt<number> = await Attempt.of(asyncFnMightThrow, ...fnArgs);
+ *
+ * // You can use async functions to map as well
+ * attempt = await attempt.map(async (n) => n * 2);
+ *
+ * // Returns the attempts value
+ * attempt.get();
+ * ```
+ *
+ * You can also wrap a function to be called later
+ *
+ * ```typescript
+ * const attemptFnMightThrow = Attempt.wrap(fnMightThrow);
+ * const attempt: Attempt<number> = attemptFnMightThrow(...fnArgs);
  * ```
  *
  * @template T The successful value type
