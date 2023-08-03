@@ -75,3 +75,7 @@ attempt = await attempt.map(async (n) => n * 2);
 // Returns the attempts value
 attempt.get();
 ```
+
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md).
