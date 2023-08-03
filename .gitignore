@@ -1,5 +1,7 @@
 .DS_Store
 
+reports
+
 docs
 
 # Logs
@@ -134,3 +136,5 @@ dist
 .pnp.*
 
 *.zip
+# stryker temp files
+.stryker-tmp

@@ -241,7 +241,7 @@ describe("orThrow", () => {
       Attempt.ofError(expectedErrorValue).orThrow(
         (error) => new Error(`expectedThrownError: ${error}`)
       )
-    ).toThrow(`expectedThrownError: ${expectedErrorValue}`);
+    ).toThrow(new Error(`expectedThrownError: ${expectedErrorValue}`));
   });
 
   test("should throw error with string from fn on failed attempt", () => {
@@ -251,7 +251,7 @@ describe("orThrow", () => {
       Attempt.ofError(expectedErrorValue).orThrow(
         (error) => `expectedThrownError: ${error}`
       )
-    ).toThrow(`expectedThrownError: ${expectedErrorValue}`);
+    ).toThrow(new Error(`expectedThrownError: ${expectedErrorValue}`));
   });
 
   test("should throw error using string message on failed attempt", () => {
@@ -260,7 +260,7 @@ describe("orThrow", () => {
 
     expect(() =>
       Attempt.ofError(expectedErrorValue).orThrow(expectedThrownError)
-    ).toThrow(expectedThrownError);
+    ).toThrow(new Error(expectedThrownError));
   });
 });
 
