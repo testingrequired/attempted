@@ -39,6 +39,11 @@
     "vitest": "0.33.0"
   },
   "files": [
-    "dist"
+    "dist/attempt.d.ts",
+    "dist/attempt.d.ts.map",
+    "dist/index.d.ts",
+    "dist/index.d.ts.map",
+    "dist/index.mjs",
+    "dist/index.umd.js"
   ]
 }
