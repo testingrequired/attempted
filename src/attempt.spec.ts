@@ -297,7 +297,7 @@ describe("map", () => {
     const mappingFnSpy = vi.fn<string[], number>();
 
     const attempt: Attempt<number> = Attempt.ofValue(123)
-      .map((v) => {
+      .map((_) => {
         throw expectedError;
         return "";
       })
@@ -436,7 +436,7 @@ describe("assert", () => {
 
     expect(
       Attempt.ofError(expectedError)
-        .assert(fn, (v) => new Error())
+        .assert(fn, (_) => new Error())
         .getError()
     ).toStrictEqual(expectedError);
   });
@@ -445,7 +445,7 @@ describe("assert", () => {
     const expectedError = new Error("expectedError");
     const fn = vi.fn();
 
-    Attempt.ofError(expectedError).assert(fn, (v) => new Error());
+    Attempt.ofError(expectedError).assert(fn, (_) => new Error());
 
     expect(fn).not.toBeCalled();
   });
